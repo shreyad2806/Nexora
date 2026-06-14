@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 export function registerExplainCommand(context: vscode.ExtensionContext): vscode.Disposable {
+	console.log('Explain command registered');
 	const disposable = vscode.commands.registerCommand('kodexa.explain', () => {
 		try {
 			vscode.window.showInformationMessage('Explain Error - Placeholder implementation');

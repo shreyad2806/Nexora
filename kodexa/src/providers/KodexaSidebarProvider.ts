@@ -2,14 +2,17 @@ import * as vscode from 'vscode';
 
 export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
 	private static _view?: vscode.WebviewView;
-	private _messageHandler?: (message: any) => void;
 
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
 	) {}
 
-	public setMessageHandler(handler: (message: any) => void): void {
-		this._messageHandler = handler;
+	public static postMessage(message: any): boolean {
+		if (KodexaSidebarProvider._view) {
+			KodexaSidebarProvider._view.webview.postMessage(message);
+			return true;
+		}
+		return false;
 	}
 
 	public resolveWebviewView(
@@ -29,13 +32,17 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
 		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
 		webviewView.webview.onDidReceiveMessage(
-			(message) => {
-				try {
-					if (this._messageHandler) {
-						this._messageHandler(message);
-					}
-				} catch (error) {
-					console.error('Webview message handler failed:', error);
+			(message: { command: string }) => {
+				switch (message.command) {
+					case 'debug':
+						vscode.commands.executeCommand('kodexa.debug');
+						break;
+					case 'explain':
+						vscode.commands.executeCommand('kodexa.explain');
+						break;
+					case 'optimize':
+						vscode.commands.executeCommand('kodexa.optimize');
+						break;
 				}
 			}
 		);
@@ -140,6 +147,28 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
             flex: 1;
             line-height: 1.4;
         }
+
+        #context-container {
+            margin-top: 16px;
+            padding: 16px;
+            background-color: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 8px;
+            overflow: auto;
+            max-height: 400px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        #context-container:empty {
+            display: none;
+        }
+
+        #context-container.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -162,6 +191,7 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
                 <span class="text">Optimize File</span>
             </button>
         </main>
+        <div id="context-container" class="hidden"></div>
     </div>
     <script nonce="${nonce}">
         (function() {
@@ -175,6 +205,18 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
                         vscode.postMessage({ command });
                     }
                 });
+            });
+
+            // Listen for messages from the extension
+            window.addEventListener('message', event => {
+                const message = event.data;
+                if (message.command === 'showContext') {
+                    const contextContainer = document.getElementById('context-container');
+                    if (contextContainer) {
+                        contextContainer.textContent = JSON.stringify(message.payload, null, 2);
+                        contextContainer.classList.remove('hidden');
+                    }
+                }
             });
         })();
     </script>

@@ -1,15 +1,31 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import { collectContext } from "../context/contextCollector";
+import { KodexaSidebarProvider } from "../providers/KodexaSidebarProvider";
 
-export function registerDebugCommand(context: vscode.ExtensionContext): vscode.Disposable {
-	const disposable = vscode.commands.registerCommand('kodexa.debug', () => {
-		try {
-			vscode.window.showInformationMessage('Debug with AI - Placeholder implementation');
-		} catch (error) {
-			console.error('Debug command failed:', error);
-			vscode.window.showErrorMessage(`Debug command failed: ${error}`);
-		}
-	});
+export function registerDebugCommand(
+    context: vscode.ExtensionContext
+) {
+    const disposable = vscode.commands.registerCommand(
+        "kodexa.debug",
 
-	context.subscriptions.push(disposable);
-	return disposable;
+        async () => {
+            try {
+               const payload = await collectContext();
+               console.log(payload);
+
+               // Send payload to webview for display
+               KodexaSidebarProvider.postMessage({
+                   command: "showContext",
+                   payload
+               });
+
+               vscode.window.showInformationMessage("Collected context successfully");
+            } catch (err) {
+                console.error(err);
+                vscode.window.showErrorMessage("Context collection failed");
+            }
+        }
+    );
+
+    context.subscriptions.push(disposable);
 }

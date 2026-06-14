@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+
+kodexa/node_modules/
+kodexa/dist/
+kodexa/.vscode-test/
+
+*.log

@@ -27,22 +27,26 @@
         {
           "type": "webview",
           "id": "kodexa.sidebar",
-          "name": "Kodexa"
+          "name": "Kodexa",
+          "icon": "$(debug-alt)"
         }
       ]
     },
     "commands": [
       {
         "command": "kodexa.debug",
-        "title": "Debug with AI"
+        "title": "Debug with AI",
+        "icon": "$(debug-alt)"
       },
       {
         "command": "kodexa.explain",
-        "title": "Explain Error"
+        "title": "Explain Error",
+        "icon": "$(question)"
       },
       {
         "command": "kodexa.optimize",
-        "title": "Optimize File"
+        "title": "Optimize File",
+        "icon": "$(zap)"
       }
     ]
   },

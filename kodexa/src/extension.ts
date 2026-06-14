@@ -3,38 +3,22 @@ import { registerDebugCommand } from './commands/debug';
 import { registerExplainCommand } from './commands/explain';
 import { registerOptimizeCommand } from './commands/optimize';
 import { KodexaSidebarProvider } from './providers/KodexaSidebarProvider';
+import { TerminalContextManager } from './context/terminal';
+
+let terminalManager: TerminalContextManager;
 
 export function activate(context: vscode.ExtensionContext) {
 	try {
-		console.log('Kodexa activated');
+		console.log('Extension activated');
+
+		terminalManager = TerminalContextManager.getInstance();
+		context.globalState.update('terminalManager', terminalManager);
 
 		registerDebugCommand(context);
 		registerExplainCommand(context);
 		registerOptimizeCommand(context);
 
 		const sidebarProvider = new KodexaSidebarProvider(context.extensionUri);
-
-		sidebarProvider.setMessageHandler((message) => {
-			try {
-				switch (message.command) {
-					case 'debug':
-						vscode.window.showInformationMessage('Debug clicked');
-						break;
-					case 'explain':
-						vscode.window.showInformationMessage('Explain clicked');
-						break;
-					case 'optimize':
-						vscode.window.showInformationMessage('Optimize clicked');
-						break;
-				}
-			} catch (error) {
-				console.error('Message handler failed:', error);
-				if (error instanceof Error) {
-					console.error('Stack trace:', error.stack);
-				}
-				vscode.window.showErrorMessage(`Failed to handle message: ${error}`);
-			}
-		});
 
 		const disposable = vscode.window.registerWebviewViewProvider('kodexa.sidebar', sidebarProvider);
 		context.subscriptions.push(disposable);
@@ -45,6 +29,10 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		throw error;
 	}
+}
+
+export function getTerminalManager(): TerminalContextManager {
+	return terminalManager;
 }
 
 export function deactivate() {}

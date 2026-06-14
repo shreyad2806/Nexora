@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 export function registerOptimizeCommand(context: vscode.ExtensionContext): vscode.Disposable {
+	console.log('Optimize command registered');
 	const disposable = vscode.commands.registerCommand('kodexa.optimize', () => {
 		try {
 			vscode.window.showInformationMessage('Optimize File - Placeholder implementation');
